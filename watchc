@@ -20,7 +20,7 @@ compare() {
     if (( $?==0 )); then
       printf '%s\n' "${file_checksum[0]}" > .watchlog
       printf "\e[38;5;91mRunning: \e[m\n\n" 
-      $(printf '%s/%s' $(pwd) ${compiled})
+      $(printf './%s' ${compiled})
       if (( $?==0 )); then
         printf "\n\e[38;5;70mProgram |\e[m%s\e[38;5;70m| returned 0\e[m\n" "${compiled}" 
         printf "\e[38;5;26mWatching file change in source\e[m\n"
