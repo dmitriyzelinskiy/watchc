@@ -1,0 +1,52 @@
+#!/usr/bin/env bash
+
+sourceCode="$1"
+compiled="$2"
+
+clear 
+
+printf "\e[38;5;26mStarted watching [\e[m%s\e[38;5;26m]\n" "$sourceCode"
+printf "Output to [\e[m%s\e[38;5;26m]\n" "$compiled"
+printf "Watching file change\e[m\n\n"
+
+compare() {
+  log=($(cat ".watchlog"))
+  file_checksum=($(shasum "$sourceCode"))
+  
+  if [[ ${log[0]} != ${file_checksum[0]} ]]; then
+    clear
+    printf "\e[1m\e[38;5;22mCompiling: \e[m\n"
+    gcc -o ${compiled} ${sourceCode}
+    if (( $?==0 )); then
+      printf '%s\n' "${file_checksum[0]}" > .watchlog
+      printf "\e[38;5;91mRunning: \e[m\n\n" 
+      $(printf '%s/%s' $(pwd) ${compiled})
+      if (( $?==0 )); then
+        printf "\n\e[38;5;70mProgram |\e[m%s\e[38;5;70m| returned 0\e[m\n" "${compiled}" 
+        printf "\e[38;5;26mWatching file change in source\e[m\n"
+      else
+        printf "\n\e[38;5;124mProgram |\e[m%s\e[38;5;124m| returned error\e[m\n" "${compiled}" 
+        printf "\e[38;5;26mWatching file change in source\e[m\n"
+      fi
+    else
+      printf "\n\e[38;5;124mCompile error in |\e[m%s\e[38;5;124m| \e[m\n" "${sourceCode}" 
+      printf "\e[38;5;26mWatching file change in source\e[m\n"
+    fi
+    printf '%s\n' "${file_checksum[0]}" > .watchlog
+  fi
+}
+
+while true; do
+  if read -t2 -srn 1; then
+    clear
+    printf "\e[38;5;26mStarted watching [\e[m%s\e[38;5;26m]\n" "$sourceCode"
+    printf "Output to [\e[m%s\e[38;5;26m]\n" "$compiled"
+    printf "Watching file change\e[m\n\n"
+    compare
+  else
+    compare
+  fi
+  
+done
+
+
